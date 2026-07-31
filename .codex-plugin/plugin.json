@@ -1,0 +1,33 @@
+{
+  "name": "work-log-hook",
+  "version": "0.1.0",
+  "description": "Inject a marked work-log checkpoint immediately after Codex context compaction.",
+  "author": {
+    "name": "iC-weiyu",
+    "email": "167525216+iC-weiyu@users.noreply.github.com",
+    "url": "https://github.com/iC-weiyu"
+  },
+  "homepage": "https://github.com/iC-weiyu/work-log-hook",
+  "repository": "https://github.com/iC-weiyu/work-log-hook",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "hook",
+    "context-compaction",
+    "work-log"
+  ],
+  "interface": {
+    "displayName": "Work Log Hook",
+    "shortDescription": "Restore a marked work-log after compaction.",
+    "longDescription": "A read-only SessionStart hook that injects the project-root work-log checkpoint after Codex compacts context.",
+    "developerName": "iC-weiyu",
+    "category": "Productivity",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/iC-weiyu/work-log-hook",
+    "defaultPrompt": [
+      "Explain how Work Log Hook restores context after compaction."
+    ]
+  }
+}

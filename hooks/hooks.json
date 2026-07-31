@@ -1,0 +1,20 @@
+{
+  "description": "Load a managed project work-log after Codex context compaction.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^compact$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/session_start.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\session_start.py\"",
+            "statusMessage": "Loading work-log recovery checkpoint",
+            "timeout": 10,
+            "additionalContextLimit": 2500
+          }
+        ]
+      }
+    ]
+  }
+}
