@@ -237,6 +237,23 @@ try {
     Assert-Equal $unmarkedResult.Stderr '' 'unmarked log case must not write stderr.'
     Write-Output 'PASS: ignore-unmarked-log'
 
+    $repoBom = Join-Path $tempRoot 'bom-prefixed'
+    $cwdBom = New-TestRepository -Root $repoBom
+    [System.IO.File]::WriteAllText(
+        (Join-Path $repoBom 'log.md'),
+        "<!-- work-log:v2 -->" + [char]10 + 'bom-prefixed',
+        [System.Text.UTF8Encoding]::new($true)
+    )
+    $bomEvent = @{
+        hook_event_name = 'SessionStart'
+        source = 'compact'
+        cwd = $cwdBom
+    } | ConvertTo-Json -Compress
+    $bomResult = Invoke-Hook -InputJson $bomEvent
+    Assert-Equal $bomResult.ExitCode 0 'BOM-prefixed log case must exit successfully.'
+    Assert-Equal $bomResult.Stdout '' 'A BOM-prefixed log does not begin with the managed marker.'
+    Assert-Equal $bomResult.Stderr '' 'BOM-prefixed log case must not write stderr.'
+    Write-Output 'PASS: ignore-bom-prefixed-log'
     $malformedResult = Invoke-Hook -InputJson '{not-json'
     Assert-Equal $malformedResult.ExitCode 0 'malformed input must exit successfully.'
     Assert-Equal $malformedResult.Stdout '' 'malformed input must not inject context.'

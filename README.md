@@ -12,6 +12,8 @@ The plugin registers one `SessionStart` handler with matcher `^compact$`. It res
 
 The Hook never searches for arbitrary logs, modifies project files, calls Context Guard, changes `compact_prompt`, or replaces Codex built-in compaction recovery.
 
+Missing, unmarked, unreadable, or non-UTF-8 logs; malformed input; and non-compact events produce no stdout and exit successfully. Unexpected internal failures write a concise error to stderr and exit nonzero.
+
 ## Requirements
 
 - Codex with lifecycle Hook and Plugin support.

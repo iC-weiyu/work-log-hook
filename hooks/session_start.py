@@ -54,7 +54,7 @@ def resolve_project_root(cwd: Path) -> Path:
 def read_managed_log(project_root: Path) -> str | None:
     log_path = project_root / "log.md"
     try:
-        content = log_path.read_text(encoding="utf-8-sig")
+        content = log_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError):
         return None
 

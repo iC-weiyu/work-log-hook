@@ -12,6 +12,8 @@
 
 Hook 不会搜索任意日志，不会修改项目文件，不调用 Context Guard，不修改 `compact_prompt`，也不替代 Codex 内置压缩恢复。
 
+日志缺失、无标记、不可读或不是 UTF-8，输入畸形，或者事件并非 compact 时，Hook 不输出 stdout 并成功退出。未预期的内部错误会向 stderr 写入简短说明并以非零状态退出。
+
 ## 环境要求
 
 - Codex 支持 lifecycle Hook 与 Plugin。
