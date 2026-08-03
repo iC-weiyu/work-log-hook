@@ -7,6 +7,7 @@ $ErrorActionPreference = 'Stop'
 $pluginRoot = Split-Path -Parent $PSScriptRoot
 $handlerPath = Join-Path $pluginRoot 'hooks\session_start.py'
 $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[Console]::InputEncoding = $utf8NoBom
 
 if (-not (Test-Path -LiteralPath $handlerPath -PathType Leaf)) {
     throw "Missing production handler: $handlerPath"
@@ -55,6 +56,7 @@ function Invoke-Hook {
     $startInfo.RedirectStandardInput = $true
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
+    $startInfo.EnvironmentVariables['PYTHONUTF8'] = '1'
 
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $startInfo
@@ -95,6 +97,7 @@ function Assert-Equal {
 function Assert-Contains {
     param(
         [Parameter(Mandatory)]
+        [AllowEmptyString()]
         [string]$Actual,
 
         [Parameter(Mandatory)]
@@ -173,6 +176,28 @@ try {
     $afterHash = (Get-FileHash -LiteralPath $logV2 -Algorithm SHA256).Hash
     Assert-Equal $afterHash $beforeHash 'The Hook modified log.md.'
     Write-Output 'PASS: compact-v2-read-only'
+
+    $eventBom = [string][char]0xFEFF
+
+    $singleBomEventV2 = $eventBom + $eventV2
+    $singleBomResultV2 = Invoke-Hook -InputJson $singleBomEventV2
+    Assert-Equal $singleBomResultV2.ExitCode 0 'Single-BOM compact event must succeed.'
+    Assert-Equal $singleBomResultV2.Stderr '' 'Single-BOM compact event must not write stderr.'
+    Assert-Contains $singleBomResultV2.Stdout '<!-- work-log:v2 -->' (
+        'Single-BOM compact event did not inject the v2 checkpoint.'
+    )
+    $singleBomPayloadV2 = ConvertFrom-HookOutput -Stdout $singleBomResultV2.Stdout
+    Assert-Contains $singleBomPayloadV2.hookSpecificOutput.additionalContext 'critical-v2' (
+        'Single-BOM compact event lost the v2 recovery content.'
+    )
+    Write-Output 'PASS: compact-single-bom-event'
+
+    $doubleBomEventV2 = $eventBom + $eventBom + $eventV2
+    $doubleBomResultV2 = Invoke-Hook -InputJson $doubleBomEventV2
+    Assert-Equal $doubleBomResultV2.ExitCode 0 'Double-BOM input must exit successfully.'
+    Assert-Equal $doubleBomResultV2.Stdout '' 'Only one leading event BOM may be removed.'
+    Assert-Equal $doubleBomResultV2.Stderr '' 'Double-BOM input must not write stderr.'
+    Write-Output 'PASS: ignore-double-bom-event'
 
     $repoV1 = Join-Path $tempRoot 'v1'
     $cwdV1 = New-TestRepository -Root $repoV1
