@@ -23,7 +23,7 @@ CONTEXT_PREFIX = (
 
 def read_event() -> dict[str, Any] | None:
     try:
-        event = json.loads(sys.stdin.read())
+        event = json.loads(sys.stdin.read().removeprefix("\ufeff"))
     except (json.JSONDecodeError, UnicodeError):
         return None
 
